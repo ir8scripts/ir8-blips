@@ -46,3 +46,10 @@ If you rename the resource folder, make sure you set the following configuration
 ServerCallbackPrefix = "ir8-blips:Server", -- Change this if you rename the resource folder
 ClientCallbackPrefix = "ir8-blips:Client", -- Change this if you rename the resource folder
 ```
+
+If you rename the database table in which this resource uses, simply update the following configuration variable to match it:
+
+```
+-- Table where blips are stored
+BlipsTable = "ir8_blips",
+```
