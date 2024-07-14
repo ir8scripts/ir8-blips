@@ -1,6 +1,8 @@
 # Blips
 
-This script acts as a real time blip manager for your server. Add / Update / and Delete blips on your map and when you're done, it will update for all players online in real time. With it's easy installation, you'll be managing your map blips in no time.
+This script is a real time blip manager for your server. Add / Update / and Delete blips on your map and when you're done, it will update for all players online in real time. With it's easy installation, you'll be managing your map blips in no time.
+
+I know there are others out there, but I created this to be a bit more user friendly and easy to use.
 
 If you need any support, feel free to reach out to us via our Discord: https://discord.gg/wzEYNCN7pH
 
@@ -23,7 +25,7 @@ Run the `__install/database.sql` file in your server's database.
 
 ### Drop the Resource
 
-Drop the package into your resources folder and remember to `ensure ir8-blips` after `ox_lib` and `oxmysql`
+Download the main branch and drop the package into your resources folder and remember to `ensure ir8-blips` after `ox_lib` and `oxmysql`
 
 ### Configuration
 
