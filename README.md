@@ -6,6 +6,10 @@ I know there are others out there, but I created this to be a bit more user frie
 
 If you need any support, feel free to reach out to us via our Discord: https://discord.gg/wzEYNCN7pH
 
+### Updates in Version 1.0.3
+- Updated config to include theme variables and title for the modal window
+- Removed duplicate colors in blip colors dropdown
+
 ### New in Version 1.0.2
 
 - Restrict Blips by Job

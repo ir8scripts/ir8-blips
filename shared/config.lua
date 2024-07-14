@@ -43,5 +43,21 @@ IR8.Config = {
 
         -- The author name of the webhook
         AuthorName = 'IR8 Blip Manager'
+    },
+
+    -- Customize NUI Theme
+    Theme = {
+
+        -- Title of the window
+        Title = "Blip Manager",
+
+        Colors = {
+
+            -- Background of the modal window
+            Background = "rgba(19, 22, 24, 0.9)",
+
+            -- Text color
+            Text = "#ffffff"
+        }
     }
 }

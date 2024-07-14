@@ -78,7 +78,7 @@ h4, h5, h6 {
 }
 
 #modal .modal-content {
-  background-color: rgba(16, 27, 82, 0.9) !important;
+  background-color: rgba(19, 22, 24, 0.9);
   border-radius: 8px;
   width: 70%;
   height: 65%;
@@ -135,7 +135,6 @@ h4, h5, h6 {
 
 .modal-side > .header {
   background-color: rgba(255, 255, 255, 0.1);
-  color: #ffffff;
   text-align: left;
   width: 100%;
   padding: 10px;
@@ -175,7 +174,6 @@ table {
   font-size: 0.9em;
   font-family: sans-serif;
   width: 100%;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
   border-top-left-radius: 8px;
   border-top-right-radius: 8px;
 }
@@ -187,7 +185,6 @@ table thead {
 
 table thead tr {
   background-color: rgba(255, 255, 255, 0.1);
-  color: #ffffff;
   text-align: left;
   border-top-left-radius: 8px;
   border-top-right-radius: 8px;

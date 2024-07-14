@@ -128,7 +128,8 @@ Citizen.CreateThread(function()
   SendNUIMessage({ 
     action = "init", 
     debug = IR8.Config.Debugging,
-    resourceName = GetCurrentResourceName()
+    resourceName = GetCurrentResourceName(),
+    theme = IR8.Config.Theme
   })
 end)
 
@@ -150,7 +151,7 @@ end)
 -- Show the NUI
 RegisterNetEvent(IR8.Config.ClientCallbackPrefix .. "ShowNUI")
 AddEventHandler (IR8.Config.ClientCallbackPrefix .. "ShowNUI", function()
-  SendNUIMessage({ action = "show", blips = Blips })
+  SendNUIMessage({ action = "show", blips = Blips, theme = IR8.Config.Theme })
   SetNuiFocus(true, true)
 end)
 

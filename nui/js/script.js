@@ -165,6 +165,35 @@ function updateBlip (key) {
     $('#modal .modal-side').show();
 }
 
+function setTheme (data) {
+    
+
+    /**
+     * Handle custom theme
+     */
+    if (data.theme) {
+
+        debugPrint(`Theme was sent`);
+
+        if (debug) {
+            console.log(JSON.stringify(data.theme));
+        }
+
+        if (data.theme.Title) {
+            $('.title-container > .title').html(data.theme.Title)
+        }
+
+        if (data.theme.Colors.Background) {
+            $('#modal .modal-content').css('background-color', data.theme.Colors.Background);
+        }
+
+        if (data.theme.Colors.Text) {
+            $('body').css('color', data.theme.Colors.Text);
+            $('.action').css('color', data.theme.Colors.Text);
+        }
+    }
+}
+
 /**
  * Message event handler from resource
  */
@@ -189,6 +218,8 @@ window.addEventListener('message', function(event){
             debug = event.data.debug
             debugPrint("Setting debug to " + debug);
         }
+
+        setTheme(event.data);
     }
 
     /**
@@ -219,6 +250,8 @@ window.addEventListener('message', function(event){
         if (!Array.isArray(event.data.blips)) {
             return fatalError("event.data.blips is not an array.");
         }
+
+        setTheme(event.data);
 
         blips = event.data.blips;
         listBlips();

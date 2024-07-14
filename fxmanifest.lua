@@ -2,7 +2,7 @@ fx_version 'cerulean'
 game 'gta5'
 author 'IR8 Scripts'
 description 'Blips script'
-version '1.0.3'
+version '1.0.4'
 lua54 'yes'
 
 client_script 'client/main.lua'
