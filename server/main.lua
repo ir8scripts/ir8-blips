@@ -1,5 +1,26 @@
 -------------------------------------------------
 -- 
+-- DISCORD WEBHOOK CONFIGURATION
+-- Thanks to complex from Project Sloth for the 
+-- suggestion to move this config to here.
+-- 
+-------------------------------------------------
+
+-- Send discord notifications when tickets are created / updated
+Discord = {
+
+    -- Only sends webhooks if this is true
+    WebhookEnabled = true,
+
+    -- The webhook url to send the request to
+    WebhookUrl = 'url',
+
+    -- The author name of the webhook
+    AuthorName = 'IR8 Blips Manager'
+}
+
+-------------------------------------------------
+-- 
 -- COMMANDS
 -- 
 -------------------------------------------------
@@ -33,7 +54,7 @@ lib.callback.register(IR8.Config.ServerCallbackPrefix .. "Create", function (sou
         -- Send discord webhook
 
         IR8.Utilities.DebugPrint("Sending discord notification for created blip.")
-        IR8.Utilities.SendDiscordEmbed({
+        SendDiscordEmbed({
             title = "Blip Created",
             message = "A blip was created for " .. data.title .. " with position of " .. data.position
         })
@@ -53,7 +74,7 @@ lib.callback.register(IR8.Config.ServerCallbackPrefix .. "Update", function (sou
         -- Send discord webhook
 
         IR8.Utilities.DebugPrint("Sending discord notification for updated blip.")
-        IR8.Utilities.SendDiscordEmbed({
+        SendDiscordEmbed({
             title = "Blip Updated",
             message = "Blip data was updated for " .. data.title .. "."
         })
@@ -75,7 +96,7 @@ lib.callback.register(IR8.Config.ServerCallbackPrefix .. "Delete", function (sou
         if blipData then
 
             IR8.Utilities.DebugPrint("Sending discord notification for deleted blip.")
-            IR8.Utilities.SendDiscordEmbed({
+            SendDiscordEmbed({
                 title = "Blip Created",
                 message = "Blip " .. blipData.title .. " was deleted."
             })
@@ -84,3 +105,48 @@ lib.callback.register(IR8.Config.ServerCallbackPrefix .. "Delete", function (sou
 
     return res
 end)
+
+-----------------------------------------------------------
+-- 
+--                    DISCORD WEBHOOK
+-- 
+-----------------------------------------------------------
+
+function SendDiscordEmbed (options)
+
+    if not Discord.WebhookEnabled then return end
+    if Discord.WebhookUrl == "url" then return end
+
+    if type(options) ~= "table" then
+        return false
+    end
+
+    if not options.title then
+        return false
+    end
+
+    if not options.message then
+        return false
+    end
+
+    local embed = {
+        {
+            ["title"] = "**".. options.title .."**",
+            ["description"] = options.message,
+        }
+    }
+
+    if options.color then
+        embed[1].color = options.color
+    end
+
+    if options.footer then
+        embed[1].footer = {
+            ["text"] = options.footer
+        }
+    end
+    
+    PerformHttpRequest(Discord.WebhookUrl, function(err, text, headers) 
+        print(err)
+    end, 'POST', json.encode({username = Discord.AuthorName, embeds = embed}), { ['Content-Type'] = 'application/json' })
+end

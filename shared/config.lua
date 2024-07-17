@@ -32,19 +32,6 @@ IR8.Config = {
         }
     },
 
-    -- Send discord notifications when blips are created / updated / deleted
-    Discord = {
-
-        -- Only sends webhooks if this is true
-        WebhookEnabled = false,
-
-        -- The webhook url to send the request to
-        WebhookUrl = 'url',
-
-        -- The author name of the webhook
-        AuthorName = 'IR8 Blip Manager'
-    },
-
     -- Customize NUI Theme
     Theme = {
 

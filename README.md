@@ -6,7 +6,9 @@ I know there are others out there, but I created this to be a bit more user frie
 
 If you need any support, feel free to reach out to us via our Discord: https://discord.gg/wzEYNCN7pH
 
-### Updates in Version 1.0.4
+### New in Version 1.0.4
+
+- Moved Webhook Configuration to server-side
 - Updated config to include theme variables and title for the modal window
 - Removed duplicate colors in blip colors dropdown
 
@@ -37,6 +39,10 @@ The real configuration variables you need to set are for the following:
 
 `Framework` and `Commands.Permissions`
 
+### Webhook Configuration
+
+You can set your webhook configuration from server/main.lua at the top of the file.
+
 ### Renaming the Resource
 
 If you rename the resource folder, make sure you set the following configuration variables to match the folder name:
@@ -45,11 +51,4 @@ If you rename the resource folder, make sure you set the following configuration
 -- Event related vars
 ServerCallbackPrefix = "ir8-blips:Server", -- Change this if you rename the resource folder
 ClientCallbackPrefix = "ir8-blips:Client", -- Change this if you rename the resource folder
-```
-
-If you rename the database table in which this resource uses, simply update the following configuration variable to match it:
-
-```
--- Table where blips are stored
-BlipsTable = "ir8_blips",
 ```
