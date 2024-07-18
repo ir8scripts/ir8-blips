@@ -7,22 +7,22 @@
 -------------------------------------------------
 
 -- Send discord notifications when tickets are created / updated
-Discord = {
+Logging = {
 
-    -- Only sends webhooks if this is true
-    WebhookEnabled = true,
+    -- Only sends webhooks if this isn't empty
+    LoggingService = 'discord', -- 'discord' | 'fivemerr' (discord is not recommended as it is not a logging service, fivemerr is a free alternative)
 
-    -- The webhook url to send the request to
-    WebhookUrl = 'url',
+    -- Discord webhook url or Fivemerr API token
+    LoggingTarget = 'url',
 
     -- The author name of the webhook
     AuthorName = 'IR8 Blips Manager'
 }
 
 -------------------------------------------------
--- 
+--
 -- COMMANDS
--- 
+--
 -------------------------------------------------
 lib.addCommand(IR8.Config.Commands.ManageBlips, {
     help = IR8.Config.Commands.ManageBlipsDescription,
@@ -33,9 +33,9 @@ lib.addCommand(IR8.Config.Commands.ManageBlips, {
 end)
 
 -------------------------------------------------
--- 
+--
 -- CALL BACKS
--- 
+--
 -------------------------------------------------
 
 -- One off loading of blips for players just connecting
@@ -47,16 +47,17 @@ end)
 lib.callback.register(IR8.Config.ServerCallbackPrefix .. "Create", function (source, data)
     local res = IR8.Utilities.CreateBlip(data)
 
-    if res.success then 
+    if res.success then
         res.blips = IR8.Utilities.GetBlips()
         TriggerClientEvent(IR8.Config.ClientCallbackPrefix .. "SetBlips", -1, res.blips)
 
         -- Send discord webhook
 
         IR8.Utilities.DebugPrint("Sending discord notification for created blip.")
-        SendDiscordEmbed({
+        SendLog({
             title = "Blip Created",
-            message = "A blip was created for " .. data.title .. " with position of " .. data.position
+            message = "A blip was created for " .. data.title .. " with position of " .. data.position,
+            source = source
         })
     end
 
@@ -67,16 +68,17 @@ end)
 lib.callback.register(IR8.Config.ServerCallbackPrefix .. "Update", function (source, data)
     local res = IR8.Utilities.UpdateBlip(data)
 
-    if res.success then 
+    if res.success then
         res.blips = IR8.Utilities.GetBlips()
         TriggerClientEvent(IR8.Config.ClientCallbackPrefix .. "SetBlips", -1, res.blips)
 
         -- Send discord webhook
 
         IR8.Utilities.DebugPrint("Sending discord notification for updated blip.")
-        SendDiscordEmbed({
+        SendLog({
             title = "Blip Updated",
-            message = "Blip data was updated for " .. data.title .. "."
+            message = "Blip data was updated for " .. data.title .. ".",
+            source = source
         })
     end
 
@@ -88,7 +90,7 @@ lib.callback.register(IR8.Config.ServerCallbackPrefix .. "Delete", function (sou
     local blipData = IR8.Utilities.GetBlip(data.id)
     local res = IR8.Utilities.DeleteBlip(data)
 
-    if res.success then 
+    if res.success then
         res.blips = IR8.Utilities.GetBlips()
         TriggerClientEvent(IR8.Config.ClientCallbackPrefix .. "SetBlips", -1, res.blips)
 
@@ -96,9 +98,10 @@ lib.callback.register(IR8.Config.ServerCallbackPrefix .. "Delete", function (sou
         if blipData then
 
             IR8.Utilities.DebugPrint("Sending discord notification for deleted blip.")
-            SendDiscordEmbed({
-                title = "Blip Created",
-                message = "Blip " .. blipData.title .. " was deleted."
+            SendLog({
+                title = "Blip Deleted",
+                message = "Blip " .. blipData.title .. " was deleted.",
+                source = source
             })
         end
     end
@@ -107,15 +110,17 @@ lib.callback.register(IR8.Config.ServerCallbackPrefix .. "Delete", function (sou
 end)
 
 -----------------------------------------------------------
--- 
+--
 --                    DISCORD WEBHOOK
--- 
+--
 -----------------------------------------------------------
 
 function SendDiscordEmbed (options)
 
-    if not Discord.WebhookEnabled then return end
-    if Discord.WebhookUrl == "url" then return end
+    if Logging.LoggingTarget == "url" then
+        lib.print.error('Attempted to create a log with discord, but webhook url is not defined!')
+        return
+    end
 
     if type(options) ~= "table" then
         return false
@@ -145,8 +150,40 @@ function SendDiscordEmbed (options)
             ["text"] = options.footer
         }
     end
-    
-    PerformHttpRequest(Discord.WebhookUrl, function(err, text, headers) 
+
+    PerformHttpRequest(Logging.LoggingTarget, function(err, text, headers)
         print(err)
-    end, 'POST', json.encode({username = Discord.AuthorName, embeds = embed}), { ['Content-Type'] = 'application/json' })
+    end, 'POST', json.encode({username = Logging.AuthorName, embeds = embed}), { ['Content-Type'] = 'application/json' })
+end
+
+function SentFivemerrLog(options)
+
+    if Logging.LoggingTarget == "url" then
+        lib.print.error('Attempted to create a log with fivemerr, but API token is not defined!')
+        return
+    end
+
+    local data = {
+        ["level"] = "info",
+        ["message"] = options.title,
+        ["resource"] = tostring(GetCurrentResourceName()),
+        ["metadata"] = {
+            ["server-id"] = tostring(options.source),
+            ["message"] = options.message
+        }
+    }
+
+    PerformHttpRequest('https://api.fivemerr.com/v1/logs', function(err, text, headers)
+        print(err)
+    end, 'POST', json.encode(data), { ['Content-Type'] = 'application/json', ['Authorization'] = tostring(Logging.LoggingTarget) })
+end
+
+function SendLog(options)
+    if Logging.LoggingService == 'discord' then
+        SendDiscordEmbed(options)
+    elseif Logging.LoggingService == 'fivemerr' then
+        SentFivemerrLog(options)
+    else
+        return
+    end
 end
