@@ -14,10 +14,7 @@
     />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link rel="stylesheet" href="css/style.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;700&display=swap" rel="stylesheet"> 
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-    <script src="js/script.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;700&display=swap" rel="stylesheet">
     <body style="background-color: transparent !important">
 
         <!-- Modal -->
@@ -33,37 +30,91 @@
                 </div>
                 <div class="modal-page">
                     <div class="modal-body">
-                        <div class="main-actions">
-                            <a href="#" id="open-form" class="btn btn-primary">Create Blip</a>
-                        </div>
 
                         <div class="alert alert-danger" style="display: none;" id="main-alert" role="alert"></div>
+                        
 
-                        <table id="blips-table">
-                            <thead>
-                                <tr>
-                                    <th>Title</th>
-                                    <th>Position</th>
-                                    <th></th>
-                                </tr>
-                            </thead>
-                            <tbody id="blips-list">
-                                <tr>
-                                    <td colspan="3">No blips to list at this time.</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                        <div class="page" id="category-page">
+                            <div class="row" id="category-list">
+
+                            </div>
+                        </div>
+
+                        <div id="blips-page" class="page">
+                            <div class="main-actions d-flex justify-content-between align-items-center">
+                                <div class="w-100 text-start">
+                                    <a href="javascript:void(0);" onclick="loadPage('category');" class="btn btn-outline-light"><i class="fas fa-arrow-left"></i></a>&nbsp;&nbsp;&nbsp;<span id="blip-category-title" style="font-size: 18px;"></span>
+                                </div>
+                                <div class="w-100 text-end">
+                                    <a href="#" id="open-form" class="btn btn-primary">Create Blip</a>
+                                </div>
+                            </div>
+
+                            <table id="blips-table">
+                                <thead>
+                                    <tr>
+                                        <th>Title</th>
+                                        <th>Category</th>
+                                        <th>Position</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="blips-list">
+                                    <tr>
+                                        <td colspan="3">No blips to list at this time.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                     <div class="modal-side">
                         <div class="header">
-                            <div>Create Blip</div>
+                            <div id="header-title"></div>
                             <a href="#" id="close-form" class="action">
                                 <i class="fas fa-times"></i>
                             </a>
                         </div>
 
-                        <form id="form">
+                        <form id="category-form" style="display: none;">
+                            <div class="alert alert-danger" style="display: none;" id="category-alert" role="alert"></div>
+
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" id="category-title">
+                                <label for="category-title">Title</label>
+                            </div>
+
+                            <input type="hidden" id="category-action" value="create" />
+                            <input type="hidden" id="category-id" value="" />
+
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div id="delete-category-options" class="me-2">
+                                    <div class="dropdown">
+                                        <button class="btn btn-danger dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                          <i class="fas fa-trash"></i>
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                          <li><a class="dropdown-item" href="javascript:void(0);" onclick="deleteCategory(false);">Delete Category Only</a></li>
+                                          <li><a class="dropdown-item" href="javascript:void(0);" onclick="deleteCategory(true);">Delete Category &amp; Blips</a></li>
+                                        </ul>
+                                      </div>
+                                </div>
+                                <div class="w-100">
+                                    <button class="btn btn-primary w-100" type="submit">
+                                        Save
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+
+                        <form id="form" style="display: none;">
                             <div class="alert alert-danger" style="display: none;" id="alert" role="alert"></div>
+
+                            <div class="form-floating mb-3">
+                                <select class="form-select" id="category_id">
+                                    
+                                </select>
+                                <label for="category_id">Category</label>
+                            </div>
 
                             <div class="form-floating mb-3">
                                 <input type="text" class="form-control" id="title">
@@ -989,5 +1040,9 @@
                 </div>
             </div>
         </div>
+         
+        <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+        <script src="js/script.js"></script>
     </body>
 </html>

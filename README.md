@@ -6,6 +6,12 @@ I know there are others out there, but I created this to be a bit more user frie
 
 If you need any support, feel free to reach out to us via our Discord: https://discord.gg/7NATz2Yw5a
 
+### New in Version 1.0.6
+- UI reworked to support categories
+- Ability to enable/disable categories and all blips under it with one click
+- Ability to set a category for a blip from options management
+- Thanks to simsonas86 for fivemerr logging support
+
 ### New in Version 1.0.5
 - Better handling for framework init with NUI
 
@@ -31,6 +37,26 @@ If you need any support, feel free to reach out to us via our Discord: https://d
 ### Database
 
 Run the `__install/database.sql` file in your server's database.
+
+### Upgrading from pre-v1.0.6
+
+If you are upgrading from v1.0.5 or before, you must also run the following SQL:
+
+```
+/*
+    The following SQL was added as of v1.0.6
+    If you are upgrading from v1.0.5 or before, you must run the following.
+*/
+
+ALTER TABLE ir8_blips ADD category_id INT NULL;
+
+CREATE TABLE IF NOT EXISTS ir8_blips_category
+(
+    id      int auto_increment primary key,
+    title   varchar(255)     null,
+    enabled int(2) default 1 null
+);
+```
 
 ### Drop the Resource
 

@@ -1,9 +1,11 @@
 -------------------------------------------------
 -- 
--- DISCORD WEBHOOK CONFIGURATION
+-- LOGGIN CONFIGURATION
 -- Thanks to complex from Project Sloth for the 
 -- suggestion to move this config to here.
 -- 
+-- Thanks to simsonas86 for fivemerr support
+--
 -------------------------------------------------
 
 -- Send discord notifications when tickets are created / updated
@@ -19,10 +21,11 @@ Logging = {
     AuthorName = 'IR8 Blips Manager'
 }
 
+
 -------------------------------------------------
---
+-- 
 -- COMMANDS
---
+-- 
 -------------------------------------------------
 lib.addCommand(IR8.Config.Commands.ManageBlips, {
     help = IR8.Config.Commands.ManageBlipsDescription,
@@ -33,23 +36,136 @@ lib.addCommand(IR8.Config.Commands.ManageBlips, {
 end)
 
 -------------------------------------------------
---
--- CALL BACKS
---
+-- 
+-- CATEGORY CALL BACKS
+-- 
+-------------------------------------------------
+
+-- List of categories
+lib.callback.register(IR8.Config.ServerCallbackPrefix .. "Categories", function ()
+    return IR8.Database.GetCategories()
+end)
+
+-- For creating a blip category
+lib.callback.register(IR8.Config.ServerCallbackPrefix .. "Category_Create", function (source, data)
+    local res = IR8.Database.CreateCategory(data)
+
+    if res.success then 
+        res.categories = IR8.Database.GetCategories()
+
+        -- Send discord webhook
+
+        IR8.Utilities.DebugPrint("Sending discord notification for created blip category.")
+        SendLog({
+            title = "Blip Category Created",
+            message = "A blip category was created for " .. data.title,
+            source = source
+        })
+    end
+
+    return res
+end)
+
+-- For saving a blip category
+lib.callback.register(IR8.Config.ServerCallbackPrefix .. "Category_Enabled", function (source, data)
+    local categoryData = IR8.Database.GetCategory(data.id)
+    local res = IR8.Database.UpdateCategoryEnabled(data.id, data.enabled)
+
+    if res.success then 
+        local allBlips = IR8.Database.GetBlips()
+        TriggerClientEvent(IR8.Config.ClientCallbackPrefix .. "SetBlips", -1, allBlips)
+
+        res.categories = IR8.Database.GetCategories()
+        res.message = categoryData.title .. " was " .. (data.enabled == 1 and 'enabled' or 'disabled')
+
+        IR8.Utilities.DebugPrint("Sending discord notification for status of blip category.")
+        SendLog({
+            title = "Blip Category Status",
+            message = "Blip Category: " .. categoryData.title .. " was " .. (data.enabled == 1 and 'enabled' or 'disabled'),
+            source = source
+        })
+    end
+
+    return res
+end)
+
+-- For saving a blip category
+lib.callback.register(IR8.Config.ServerCallbackPrefix .. "Category_Update", function (source, data)
+    local categoryData = IR8.Database.GetCategory(data.id)
+    local res = IR8.Database.UpdateCategory(data)
+
+    if res.success then 
+        res.categories = IR8.Database.GetCategories()
+
+        IR8.Utilities.DebugPrint("Sending discord notification for status of blip category update.")
+        SendLog({
+            title = "Blip Category Status",
+            message = "Blip Category: " .. categoryData.title .. " was updated",
+            source = source
+        })
+    end
+
+    return res
+end)
+
+-- For deleting a blip category
+lib.callback.register(IR8.Config.ServerCallbackPrefix .. "Category_Delete", function (source, data)
+    local categoryData = IR8.Database.GetCategory(data.id)
+    local res = IR8.Database.DeleteCategory(data)
+
+    if res.success then 
+        res.categories = IR8.Database.GetCategories()
+
+        IR8.Utilities.DebugPrint("Sending discord notification for status of blip category deletion.")
+        SendLog({
+            title = "Blip Category Deletion",
+            message = "Blip Category: " .. categoryData.title .. " was deleted",
+            source = source
+        })
+
+        if (data.deleteBlips) then
+            local allBlips = IR8.Database.GetBlips()
+            TriggerClientEvent(IR8.Config.ClientCallbackPrefix .. "SetBlips", -1, allBlips)
+        end
+    end
+
+    return res
+end)
+
+-- One off loading of blips for players just connecting
+lib.callback.register(IR8.Config.ServerCallbackPrefix .. "Category_Blips", function (source, data)
+    local res = IR8.Database.GetBlips(data.categoryId)
+
+    if res then
+        return {
+            success = true,
+            blips = res
+        }
+    else
+        return { success = false, error = "Failed to load blips for category" }
+    end
+end)
+
+-------------------------------------------------
+-- 
+-- BLIP CALL BACKS
+-- 
 -------------------------------------------------
 
 -- One off loading of blips for players just connecting
 lib.callback.register(IR8.Config.ServerCallbackPrefix .. "LoadBlips", function ()
-    return IR8.Utilities.GetBlips()
+    return IR8.Database.GetBlips()
 end)
 
 -- For creating a blip
 lib.callback.register(IR8.Config.ServerCallbackPrefix .. "Create", function (source, data)
-    local res = IR8.Utilities.CreateBlip(data)
+    local res = IR8.Database.CreateBlip(data)
 
-    if res.success then
-        res.blips = IR8.Utilities.GetBlips()
-        TriggerClientEvent(IR8.Config.ClientCallbackPrefix .. "SetBlips", -1, res.blips)
+    if res.success then 
+        res.blips = IR8.Database.GetBlips(data.selectedCategoryId and data.selectedCategoryId or false)
+
+        local allBlips = IR8.Database.GetBlips()
+        TriggerClientEvent(IR8.Config.ClientCallbackPrefix .. "SetBlips", -1, allBlips)
 
         -- Send discord webhook
 
@@ -66,11 +182,13 @@ end)
 
 -- For saving a blip
 lib.callback.register(IR8.Config.ServerCallbackPrefix .. "Update", function (source, data)
-    local res = IR8.Utilities.UpdateBlip(data)
+    local res = IR8.Database.UpdateBlip(data)
 
-    if res.success then
-        res.blips = IR8.Utilities.GetBlips()
-        TriggerClientEvent(IR8.Config.ClientCallbackPrefix .. "SetBlips", -1, res.blips)
+    if res.success then 
+        res.blips = IR8.Database.GetBlips(data.selectedCategoryId and data.selectedCategoryId or false)
+
+        local allBlips = IR8.Database.GetBlips()
+        TriggerClientEvent(IR8.Config.ClientCallbackPrefix .. "SetBlips", -1, allBlips)
 
         -- Send discord webhook
 
@@ -87,12 +205,14 @@ end)
 
 -- For deleting a blip
 lib.callback.register(IR8.Config.ServerCallbackPrefix .. "Delete", function (source, data)
-    local blipData = IR8.Utilities.GetBlip(data.id)
-    local res = IR8.Utilities.DeleteBlip(data)
+    local blipData = IR8.Database.GetBlip(data.id)
+    local res = IR8.Database.DeleteBlip(data)
 
-    if res.success then
-        res.blips = IR8.Utilities.GetBlips()
-        TriggerClientEvent(IR8.Config.ClientCallbackPrefix .. "SetBlips", -1, res.blips)
+    if res.success then 
+        res.blips = IR8.Database.GetBlips(data.selectedCategoryId and data.selectedCategoryId or false)
+
+        local allBlips = IR8.Database.GetBlips()
+        TriggerClientEvent(IR8.Config.ClientCallbackPrefix .. "SetBlips", -1, allBlips)
 
         -- Send discord webhook
         if blipData then

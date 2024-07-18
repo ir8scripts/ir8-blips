@@ -93,6 +93,12 @@ function drawBlips ()
       if blip.job and PlayerData.job.name ~= blip.job then continue = false end
     end
 
+    if blip.category then
+      if blip.category.enabled == 0 then
+        continue = false
+      end
+    end
+
     if continue then
       Blips[k].blip = AddBlipForCoord(blip.positionX, blip.positionY, blip.positionZ)
       SetBlipSprite(Blips[k].blip, blip.blip_id)
@@ -113,7 +119,6 @@ end
 -- 
 -------------------------------------------------
 function removeBlips ()
-  print(Blips)
 
   for k, blip in pairs(Blips) do
     if Blips[k].blip then
@@ -181,7 +186,8 @@ end)
 -- Show the NUI
 RegisterNetEvent(IR8.Config.ClientCallbackPrefix .. "ShowNUI")
 AddEventHandler (IR8.Config.ClientCallbackPrefix .. "ShowNUI", function()
-  SendNUIMessage({ action = "show", blips = Blips, theme = IR8.Config.Theme })
+  local categories = lib.callback.await(IR8.Config.ServerCallbackPrefix .. 'Categories', false)
+  SendNUIMessage({ action = "show", categories = categories, theme = IR8.Config.Theme })
   SetNuiFocus(true, true)
 end)
 
@@ -229,6 +235,64 @@ RegisterNUICallback('hide', function(_, cb)
   cb({})
 end)
 
+-------------------------------------------------
+-- 
+-- CATEGORY NUI EVENTS
+-- 
+-------------------------------------------------
+
+-- Blip creation
+RegisterNUICallback('category_create', function(data, cb)
+  local res = lib.callback.await(IR8.Config.ServerCallbackPrefix .. 'Category_Create', false, data)
+
+  if res.success then
+    SendNUIMessage({ action = "category_update", categories = res.categories })
+  end
+
+  cb(res)
+end)
+
+-- Blip update
+RegisterNUICallback('category_update', function(data, cb)
+  local res = lib.callback.await(IR8.Config.ServerCallbackPrefix .. 'Category_Update', false, data)
+
+  if res.success then
+    SendNUIMessage({ action = "category_update", categories = res.categories })
+  end
+
+  cb(res)
+end)
+
+-- Blip update
+RegisterNUICallback('category_enabled', function(data, cb)
+  local res = lib.callback.await(IR8.Config.ServerCallbackPrefix .. 'Category_Enabled', false, data)
+
+  cb(res)
+end)
+
+-- Blip delete
+RegisterNUICallback('category_delete', function(data, cb)
+  local res = lib.callback.await(IR8.Config.ServerCallbackPrefix .. 'Category_Delete', false, data)
+
+  if res.success then
+    SendNUIMessage({ action = "category_update", categories = res.categories })
+  end
+
+  cb(res)
+end)
+
+-- Blips for category
+RegisterNUICallback('category_blips', function(data, cb)
+  local res = lib.callback.await(IR8.Config.ServerCallbackPrefix .. 'Category_Blips', false, data)
+  cb(res)
+end)
+
+-------------------------------------------------
+-- 
+-- BLIP NUI EVENTS
+-- 
+-------------------------------------------------
+
 -- Blip creation
 RegisterNUICallback('create', function(data, cb)
   local res = lib.callback.await(IR8.Config.ServerCallbackPrefix .. 'Create', false, data)
@@ -262,6 +326,12 @@ RegisterNUICallback('delete', function(data, cb)
   cb(res)
 end)
 
+-------------------------------------------------
+-- 
+-- MISC NUI EVENTS
+-- 
+-------------------------------------------------
+
 -- Position request
 RegisterNUICallback('position', function(_, cb)
   local playerCoords = GetEntityCoords(PlayerPedId())
@@ -282,7 +352,11 @@ end)
 -------------------------------------------------
 AddEventHandler('onResourceStart', function(resource)
   if resource == GetCurrentResourceName() then
-    IR8.Utilities.DebugPrint('Blips system loaded')
+    SendNUIMessage({ 
+      action = "init", 
+      debug = IR8.Config.Debugging,
+      theme = IR8.Config.Theme
+    })
   end
 end)
 

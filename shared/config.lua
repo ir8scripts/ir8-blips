@@ -16,6 +16,9 @@ IR8.Config = {
     ServerCallbackPrefix = "ir8-blips:Server", -- Change this if you rename the resource folder
     ClientCallbackPrefix = "ir8-blips:Client", -- Change this if you rename the resource folder
 
+    -- Table where blip categories are stored 
+    CategoriesTable = "ir8_blips_category",
+
     -- Table where blips are stored
     BlipsTable = "ir8_blips",
 

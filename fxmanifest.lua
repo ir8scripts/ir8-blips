@@ -2,13 +2,14 @@ fx_version 'cerulean'
 game 'gta5'
 author 'IR8 Scripts'
 description 'Blips script'
-version '1.0.5'
+version '1.0.6'
 lua54 'yes'
 
 client_script 'client/main.lua'
 
 server_script {
     '@oxmysql/lib/MySQL.lua', 
+    'server/database.lua',
     'server/main.lua'
 }
 
