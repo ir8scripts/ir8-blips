@@ -4,7 +4,7 @@ This script is a real time blip manager for your server. Add / Update / and Dele
 
 I know there are others out there, but I created this to be a bit more user friendly and easy to use.
 
-If you need any support, feel free to reach out to us via our Discord: https://discord.gg/wzEYNCN7pH
+If you need any support, feel free to reach out to us via our Discord: https://discord.gg/7NATz2Yw5a
 
 ### New in Version 1.0.4
 
