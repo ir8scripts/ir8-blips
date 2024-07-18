@@ -6,7 +6,23 @@
 Blips = {}
 BlipsLoaded = false
 PlayerData = {}
+PlayerLoadedEvent = false
 Framework = nil
+
+-------------------------------------------------
+-- 
+-- PLAYER LOADED EVENT SETUP
+-- 
+-------------------------------------------------
+if IR8.Config.Framework == "esx" then
+  PlayerLoadedEvent = "esx:playerLoaded"
+elseif IR8.Config.Framework == "qbcore" then
+  PlayerLoadedEvent = "QBCore:Client:OnPlayerLoaded"
+end
+
+if PlayerLoadedEvent then
+  IR8.Utilities.DebugPrint("[Framework.PlayerLoadedEvent] set to " .. PlayerLoadedEvent)
+end
 
 -------------------------------------------------
 -- 
@@ -125,12 +141,14 @@ Citizen.CreateThread(function()
 
   drawBlips()
 
-  SendNUIMessage({ 
-    action = "init", 
-    debug = IR8.Config.Debugging,
-    resourceName = GetCurrentResourceName(),
-    theme = IR8.Config.Theme
-  })
+  -- If framework not found, attempt to init here
+  if not PlayerLoadedEvent then
+    SendNUIMessage({ 
+      action = "init", 
+      debug = IR8.Config.Debugging,
+      theme = IR8.Config.Theme
+    })
+  end
 end)
 
 -------------------------------------------------
@@ -138,6 +156,18 @@ end)
 -- EVENTS
 -- 
 -------------------------------------------------
+
+-- PlayerLoaded event handler based on framework
+if PlayerLoadedEvent then
+  RegisterNetEvent(PlayerLoadedEvent)
+  AddEventHandler (PlayerLoadedEvent, function()
+    SendNUIMessage({ 
+      action = "init", 
+      debug = IR8.Config.Debugging,
+      theme = IR8.Config.Theme
+    })
+  end)
+end
 
 -- Show blips
 RegisterNetEvent(IR8.Config.ClientCallbackPrefix .. "SetBlips")
@@ -155,23 +185,36 @@ AddEventHandler (IR8.Config.ClientCallbackPrefix .. "ShowNUI", function()
   SetNuiFocus(true, true)
 end)
 
--- When job is updated for ESX
-RegisterNetEvent('esx:setJob')
-AddEventHandler('esx:setJob', function(job)
-    PlayerData.job = job
-    removeBlips()
-    loadBlips()
-    drawBlips()
-end)
+-------------------------------------------------
+-- 
+-- JOB UPDATE EVENTS
+-- 
+-------------------------------------------------
 
--- When job is updated for QBCore
-RegisterNetEvent('QBCore:Client:OnJobUpdate')
-AddEventHandler('QBCore:Client:OnJobUpdate', function(job)
-    PlayerData.job = job
-    removeBlips()
-    loadBlips()
-    drawBlips()
-end)
+if IR8.Config.Framework == "esx" then
+
+  -- When job is updated for ESX
+  RegisterNetEvent('esx:setJob')
+  AddEventHandler('esx:setJob', function(job)
+      PlayerData.job = job
+      removeBlips()
+      loadBlips()
+      drawBlips()
+  end)
+
+-- Check for QBCore
+elseif IR8.Config.Framework == "qbcore" then
+
+  -- When job is updated for QBCore
+  RegisterNetEvent('QBCore:Client:OnJobUpdate')
+  AddEventHandler('QBCore:Client:OnJobUpdate', function(job)
+      PlayerData.job = job
+      removeBlips()
+      loadBlips()
+      drawBlips()
+  end)
+  
+end
 
 -------------------------------------------------
 -- 
@@ -251,6 +294,7 @@ end)
 AddEventHandler('onResourceStop', function(resource)
   if resource == GetCurrentResourceName() then
     if BlipsLoaded then
+      IR8.Utilities.DebugPrint('Removing blips due to script stop.')
       removeBlips()
     end
   end

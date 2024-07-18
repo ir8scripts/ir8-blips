@@ -1,5 +1,4 @@
 var currentEvent = false;
-var resourceName = 'ir8-blips';
 var debug = false;
 var blips = [];
 
@@ -23,7 +22,7 @@ async function nuiRequest (path, data = {}) {
     }
 
     return $.ajax({
-        url: `https://${resourceName}/${path}`,
+        url: `https://${GetParentResourceName()}/${path}`,
         type: 'POST',
         dataType: 'json',
         data: JSON.stringify(data)
@@ -132,7 +131,7 @@ function resetForm () {
     $('#scale').val('0.5');
 
     $('.blip-preview')
-        .css('background-image', 'url(nui://' + resourceName + '/nui/images/blips/9.png)')
+        .css('background-image', 'url(nui://' + GetParentResourceName() + '/nui/images/blips/9.png)')
         .css('background-size', 'contain')
         .css('background-repeat', 'no-repeat')
         .css('background-position', 'center center')
@@ -156,7 +155,7 @@ function updateBlip (key) {
     $('#scale').val(data.scale);
 
     $('.blip-preview')
-        .css('background-image', 'url(nui://' + resourceName + '/nui/images/blips/' + data.blip_id + '.png)')
+        .css('background-image', 'url(nui://' + GetParentResourceName() + '/nui/images/blips/' + data.blip_id + '.png)')
         .css('background-size', 'contain')
         .css('background-repeat', 'no-repeat')
         .css('background-position', 'center center')
@@ -209,10 +208,6 @@ window.addEventListener('message', function(event){
      * Sets prereqs for script
      */
     if (event.data.action == "init") {
-        if (event.data.resourceName) {
-            resourceName = event.data.resourceName
-            debugPrint("Setting resourceName to " + resourceName);
-        }
 
         if (event.data.debug) {
             debug = event.data.debug
@@ -312,7 +307,7 @@ $(document).ready(function () {
             $('.blip-preview').hide();
         } else {
             $('.blip-preview')
-                .css('background-image', 'url(nui://' + resourceName + '/nui/images/blips/' + $(this).val() + '.png)')
+                .css('background-image', 'url(nui://' + GetParentResourceName() + '/nui/images/blips/' + $(this).val() + '.png)')
                 .css('background-size', 'contain')
                 .css('background-repeat', 'no-repeat')
                 .css('background-position', 'center center')
